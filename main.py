@@ -100,7 +100,7 @@ def build_question(question: str, template: str = "", limit: int = 0) -> str:
 
 @register(
     "astrbot_plugin_ima_kb",
-    "Buddy",
+    "deadheartQ",
     "让机器人查询腾讯 ima 知识库：游戏设定、角色资料、剧情考据等专业内容，支持订阅库",
     "1.1.0",
 )
@@ -113,9 +113,7 @@ class ImaKbPlugin(Star):
         self.cookie = str(_pick(cfg, "auth.x_ima_cookie", "") or "").strip()
         self.bkn = str(_pick(cfg, "auth.x_ima_bkn", "") or "").strip()
         self.kbs = parse_knowledge_bases(_pick(cfg, "knowledge.knowledge_bases", []))
-        self.default_kb = str(
-            _pick(cfg, "knowledge.default_knowledge_base", "") or ""
-        ).strip()
+        self.default_kb = str(_pick(cfg, "knowledge.default_knowledge_base", "") or "").strip()
         self.max_seconds = int(_pick(cfg, "runtime.max_seconds", 45) or 45)
         self.max_chars = int(_pick(cfg, "runtime.max_chars", 900) or 900)
         self.cache_minutes = int(_pick(cfg, "runtime.cache_minutes", 10) or 0)
@@ -161,9 +159,7 @@ class ImaKbPlugin(Star):
 
     def _get_client(self) -> ImaClient:
         if self._client is None:
-            self._client = ImaClient(
-                self.cookie, self.bkn, timeout=self.max_seconds + 15
-            )
+            self._client = ImaClient(self.cookie, self.bkn, timeout=self.max_seconds + 15)
         return self._client
 
     _KB_SPLIT = re.compile(r"[\s·|/、，,：:（）()\[\]【】]+")
@@ -193,10 +189,7 @@ class ImaKbPlugin(Star):
                 best = max(best, 1000 + len(token) * 10 + len(token) / ln * 5)
                 continue
             for size in range(len(token) - 1, cls._KB_MIN_PARTIAL - 1, -1):
-                if any(
-                    token[i : i + size] in question
-                    for i in range(len(token) - size + 1)
-                ):
+                if any(token[i : i + size] in question for i in range(len(token) - size + 1)):
                     best = max(best, size + size / ln * 5)
                     break
         return best
@@ -256,9 +249,7 @@ class ImaKbPlugin(Star):
     # ---------------------------------------------------------------- 工具
 
     @filter.llm_tool(name="ima_ask")
-    async def ima_ask(
-        self, event: AstrMessageEvent, question: str, knowledge_base: str = ""
-    ):
+    async def ima_ask(self, event: AstrMessageEvent, question: str, knowledge_base: str = ""):
         """查询 ima 知识库（腾讯 AI 知识管家）里的专业资料。
 
         当用户问到游戏设定、角色档案、剧情考据、道具机制等"需要查资料"的内容时调用，
@@ -284,9 +275,7 @@ class ImaKbPlugin(Star):
         t0 = time.time()
         try:
             async with self._sem:  # 串行，避免 ima 侧 Code=3
-                raw = await self._get_client().ask(
-                    ask_q, kb_id, max_seconds=self.max_seconds
-                )
+                raw = await self._get_client().ask(ask_q, kb_id, max_seconds=self.max_seconds)
             cost = time.time() - t0
             text = clean(raw, max_len=self.max_chars)
             if not text:
@@ -329,9 +318,7 @@ class ImaKbPlugin(Star):
         ask_q = self._ask_text(q)
         try:
             async with self._sem:
-                raw = await self._get_client().ask(
-                    ask_q, kb_id, max_seconds=self.max_seconds
-                )
+                raw = await self._get_client().ask(ask_q, kb_id, max_seconds=self.max_seconds)
             text = clean(raw, max_len=0)
             yield event.plain_result(f"【{kb_name}】\n{text or '（没查到内容）'}")
         except (ImaError, ImaAuthError) as e:
@@ -346,8 +333,8 @@ class ImaKbPlugin(Star):
             f"cookie/bkn：{'已配置' if self.cookie and self.bkn else '缺失'}",
             f"知识库：{len(self.kbs)} 个 {list(self.kbs) if self.kbs else ''}",
             f"提问提示词：{self._prompt_desc()}",
-            f"超时：{self.max_seconds}s   截断：{self.max_chars} 字   缓存：{self.cache_minutes} 分钟",
-            f"缓存条目：{len(self._cache)}",
+            f"超时：{self.max_seconds}s   截断：{self.max_chars} 字",
+            f"缓存：{self.cache_minutes} 分钟   缓存条目：{len(self._cache)}",
         ]
         yield event.plain_result("\n".join(lines))
 

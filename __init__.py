@@ -11,7 +11,7 @@ AstrBot 通过 `__import__("data.plugins.<插件名>.main")` 加载插件，靠�
 NickCharlie/astrbot_plugin_self_learning 的同名文件（AGPL-3.0，此处仅借鉴思路）。
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 import sys as _sys
 import types as _types

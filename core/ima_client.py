@@ -121,16 +121,12 @@ class ImaClient:
             out.append(f"IMA-TOKEN={self._token}")
         return "; ".join(out)
 
-    def _headers(
-        self, *, for_init: bool = False, for_refresh: bool = False
-    ) -> dict[str, str]:
+    def _headers(self, *, for_init: bool = False, for_refresh: bool = False) -> dict[str, str]:
         head_accepted = for_init or for_refresh
         h = {
             "accept": "application/json" if head_accepted else "*/*",
             "accept-language": "zh-CN,zh;q=0.9",
-            "content-type": "application/json"
-            if head_accepted
-            else "text/event-stream",
+            "content-type": "application/json" if head_accepted else "text/event-stream",
             "extension_version": "999.999.999",
             "from_browser_ima": "1",
             "origin": "https://ima.qq.com",
@@ -211,9 +207,7 @@ class ImaClient:
             },
         }
         async with httpx.AsyncClient(timeout=self.timeout) as c:
-            r = await c.post(
-                BASE_URL + INIT_PATH, json=body, headers=self._headers(for_init=True)
-            )
+            r = await c.post(BASE_URL + INIT_PATH, json=body, headers=self._headers(for_init=True))
         if r.status_code != 200:
             raise ImaError(f"init_session HTTP {r.status_code}: {r.text[:300]}")
         try:
@@ -236,13 +230,9 @@ class ImaClient:
             await self.ensure_token(force=True)
             data = await self._init_once(kb_id)
         if _is_login_expired(data):
-            raise ImaAuthError(
-                f"登录态失效 code={data.get('code')} msg={data.get('msg')}"
-            )
+            raise ImaAuthError(f"登录态失效 code={data.get('code')} msg={data.get('msg')}")
         if data.get("code") != 0 or not data.get("session_id"):
-            raise ImaError(
-                f"init_session 失败 code={data.get('code')} msg={data.get('msg')}"
-            )
+            raise ImaError(f"init_session 失败 code={data.get('code')} msg={data.get('msg')}")
         sid = data["session_id"]
         self._sessions[kb_id] = (sid, time.time())
         return sid
@@ -260,9 +250,7 @@ class ImaClient:
             "robot_type": int(self.robot_type),
             "question": question,
             "question_type": 2,
-            "client_id": "".join(
-                random.choices(string.ascii_lowercase + string.digits, k=24)
-            ),
+            "client_id": "".join(random.choices(string.ascii_lowercase + string.digits, k=24)),
             "command_info": {
                 "type": 14,
                 "knowledge_qa_info": {"tags": [], "knowledge_ids": []},
@@ -297,9 +285,7 @@ class ImaClient:
         for key in ("task_infos", "taskInfos"):
             for t in obj.get(key) or []:
                 if isinstance(t, dict):
-                    toast = (t.get("toast_task") or t.get("toastTask") or {}).get(
-                        "content"
-                    )
+                    toast = (t.get("toast_task") or t.get("toastTask") or {}).get("content")
                     if toast:
                         self._last_toast_holder.append(str(toast))
         data = obj.get("Data") or obj.get("data")
@@ -316,14 +302,10 @@ class ImaClient:
             return obj["content"]
         msgs = obj.get("msgs")
         if isinstance(msgs, list):
-            return "".join(
-                str(m.get("content", "")) for m in msgs if isinstance(m, dict)
-            )
+            return "".join(str(m.get("content", "")) for m in msgs if isinstance(m, dict))
         return ""
 
-    async def ask(
-        self, question: str, kb_id: str, *, max_seconds: float | None = None
-    ) -> str:
+    async def ask(self, question: str, kb_id: str, *, max_seconds: float | None = None) -> str:
         """向指定知识库提问，返回拼好的纯文本答案。
 
         max_seconds: 硬超时（含建会话）。超时抛 ImaError，调用方自己降级。
@@ -339,9 +321,7 @@ class ImaClient:
             self._last_toast_holder = []
             async with (
                 httpx.AsyncClient(timeout=self.timeout) as c,
-                c.stream(
-                    "POST", BASE_URL + QA_PATH, json=body, headers=self._headers()
-                ) as r,
+                c.stream("POST", BASE_URL + QA_PATH, json=body, headers=self._headers()) as r,
             ):
                 if r.status_code != 200:
                     text = (await r.aread()).decode("utf-8", "replace")

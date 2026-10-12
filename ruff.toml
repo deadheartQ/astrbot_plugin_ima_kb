@@ -1,0 +1,16 @@
+# 插件自带 ruff 配置，让检查口径可复现（不依赖上层目录的配置）。
+# line-length 取 100：代码里中文提示串较多，88 会折得很难读。
+line-length = 100
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B", "S", "ISC", "RUF", "BLE"]
+ignore = [
+    "RUF001", # 中文全角标点不算「易混淆字符」
+    "RUF002",
+    "RUF003",
+    # 这几条是刻意的：兜底登记命名空间包失败、缓存读写失败、
+    # 清理失败都不该影响插件加载与查询，吞掉异常继续跑是设计目标。
+    "S110", # try-except-pass
+    "S112", # try-except-continue
+    "S311", # client_id 只是随机串，ima 侧不校验加密强度，与 kuro_sign 的 devCode 同理
+]

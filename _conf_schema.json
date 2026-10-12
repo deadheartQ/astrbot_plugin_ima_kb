@@ -8,12 +8,14 @@
         "description": "x-ima-cookie",
         "type": "string",
         "default": "",
+        "secret": true,
         "hint": "很长的一串。必须包含 IMA-REFRESH-TOKEN 字段，否则 token 到期后无法自动续期。"
       },
       "x_ima_bkn": {
         "description": "x-ima-bkn",
         "type": "string",
         "default": "",
+        "secret": true,
         "hint": "同一个请求头里的 x-ima-bkn，一般是一串数字。"
       }
     }

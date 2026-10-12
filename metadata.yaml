@@ -2,7 +2,7 @@ name: astrbot_plugin_ima_kb
 display_name: ima 知识库
 desc: 让机器人查腾讯 ima 知识库（含订阅库）里的专业资料。用浏览器登录态调 ima 内部接口，命中后由模型用自己的口吻转述；支持自定义提问提示词与答案字数上限，带超时降级、结果缓存与 markdown 清洗，适合群聊场景
 short_desc: 让机器人能查腾讯 ima 知识库里的游戏设定、角色档案、剧情考据
-version: v1.1.0
+version: "1.1.0"
 author: deadheartQ
 repo: https://github.com/deadheartQ/astrbot_plugin_ima_kb
 # 下限取得保守：只用到 filter.command / filter.llm_tool / event.plain_result 这些老 API。
