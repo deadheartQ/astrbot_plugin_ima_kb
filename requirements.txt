@@ -1,0 +1,2 @@
+# ima 内部接口用 httpx 异步请求（文档要求：不要用 requests）
+httpx>=0.24

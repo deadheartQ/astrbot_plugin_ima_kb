@@ -1,0 +1,83 @@
+{
+  "auth": {
+    "description": "ima 登录态（必填）",
+    "hint": "浏览器登录 https://ima.qq.com 后按 F12 → Network → 在 ima 里发一条消息 → 点 /cgi-bin/assistant/qa 请求 → Request Headers，复制里面的 x-ima-cookie 与 x-ima-bkn。这串 cookie 等于账号访问凭证，不要外传。",
+    "type": "object",
+    "items": {
+      "x_ima_cookie": {
+        "description": "x-ima-cookie",
+        "type": "string",
+        "default": "",
+        "hint": "很长的一串。必须包含 IMA-REFRESH-TOKEN 字段，否则 token 到期后无法自动续期。"
+      },
+      "x_ima_bkn": {
+        "description": "x-ima-bkn",
+        "type": "string",
+        "default": "",
+        "hint": "同一个请求头里的 x-ima-bkn，一般是一串数字。"
+      }
+    }
+  },
+  "knowledge": {
+    "description": "知识库",
+    "hint": "插件支持的每个知识库都要在这里登记。库 ID 的拿法：在 ima 里选中该知识库，F12 找 /cgi-bin/session_logic/init_session 请求，Payload 里的 knowledge_base_id。",
+    "type": "object",
+    "items": {
+      "knowledge_bases": {
+        "description": "知识库列表（名字=库ID）",
+        "type": "list",
+        "default": [],
+        "hint": "每一条写成「名字=知识库ID」，名字必须有——插件靠它匹配用户问题来决定查哪个库。只填 ID（如 1234567890123456）也能跑，但没法区分题材，会一律查第一个。例：游戏设定资料=1234567890123456"
+      },
+      "default_knowledge_base": {
+        "description": "默认知识库",
+        "type": "string",
+        "default": "",
+        "hint": "问题没匹配到任何库名时用哪个（填库名或库 ID）。留空则用列表里的第一个。"
+      }
+    }
+  },
+  "runtime": {
+    "description": "工具与性能",
+    "hint": "控制模型何时能查、查多久、喂多少。默认值是按「群聊里别干等」调的。",
+    "type": "object",
+    "items": {
+      "enable_llm_tool": {
+        "description": "启用 ima_ask 工具",
+        "type": "bool",
+        "default": true,
+        "hint": "开启后模型自己判断何时去查知识库；闲聊不会触发。关掉则只能用 /ima 命令手动查。"
+      },
+      "ask_prompt": {
+        "description": "提问提示词（可留空）",
+        "type": "text",
+        "default": "",
+        "hint": "发给 ima 的提问模板，用 {question} 代表用户问的那句话；留空 = 原样提问。想控制回答风格就写这里，例如：请用简洁的中文回答，只讲结论和要点，不要罗列原文。{question}"
+      },
+      "answer_limit": {
+        "description": "答案字数上限（0 = 不限）",
+        "type": "int",
+        "default": 0,
+        "hint": "填 300 这类数字时，插件会在提问末尾追加一句「请用不超过 N 字回答」。ima 没有真正的长度参数，这是控制它答案长短最省事的开关。若提示词里已手写了字数要求，这里保持 0，别重复。"
+      },
+      "max_seconds": {
+        "description": "单次查询超时（秒）",
+        "type": "int",
+        "default": 45,
+        "hint": "实测一次问答 15~25 秒，别设太小。超时后放弃查询，让模型正常回答，群聊不会干等。"
+      },
+      "max_chars": {
+        "description": "喂给模型的资料上限（字）",
+        "type": "int",
+        "default": 900,
+        "hint": "ima 的答案常常上千字，太长会挤压上下文，也更容易被大段照抄。建议 600~1200。"
+      },
+      "cache_minutes": {
+        "description": "相同问题的缓存时长（分钟）",
+        "type": "int",
+        "default": 10,
+        "hint": "群里同一个问题被反复问时直接复用结果，不再打 ima。设 0 关闭缓存。"
+      }
+    }
+  }
+}
